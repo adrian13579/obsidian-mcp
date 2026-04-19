@@ -1,0 +1,26 @@
+{
+  "name": "obsidian-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for interacting with an Obsidian vault",
+  "main": "dist/index.js",
+  "bin": {
+    "obsidian-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": ["mcp", "obsidian", "markdown"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.3"
+  }
+}
