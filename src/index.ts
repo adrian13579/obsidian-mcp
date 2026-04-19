@@ -117,10 +117,12 @@ const server = new McpServer({
 });
 
 // Tool: List notes
-server.tool(
+server.registerTool(
   "list_notes",
-  "List all markdown notes in the vault, optionally filtered by folder",
-  { folder: z.string().optional().describe("Subfolder to list (e.g. 'projects'). Lists entire vault if omitted.") },
+  {
+    description: "List all markdown notes in the vault, optionally filtered by folder",
+    inputSchema: { folder: z.string().optional().describe("Subfolder to list (e.g. 'projects'). Lists entire vault if omitted.") },
+  },
   async ({ folder }) => {
     const dir = folder ? resolveVaultPath(folder) : VAULT_PATH!;
     const files = await getAllMarkdownFiles(dir);
@@ -131,10 +133,12 @@ server.tool(
 );
 
 // Tool: Read note
-server.tool(
+server.registerTool(
   "read_note",
-  "Read the content of a note. Returns frontmatter, content, tags, and references.",
-  { path: z.string().describe("Path to the note relative to vault root (e.g. 'projects/myproject.md' or 'daily/2024-01-01')") },
+  {
+    description: "Read the content of a note. Returns frontmatter, content, tags, and references.",
+    inputSchema: { path: z.string().describe("Path to the note relative to vault root (e.g. 'projects/myproject.md' or 'daily/2024-01-01')") },
+  },
   async ({ path: notePath }) => {
     const fullPath = resolveNotePath(notePath);
     const raw = await fs.readFile(fullPath, "utf-8");
@@ -161,17 +165,19 @@ server.tool(
 );
 
 // Tool: Create note
-server.tool(
+server.registerTool(
   "create_note",
-  "Create a new note in the vault with optional frontmatter and content",
   {
-    path: z.string().describe("Path for the new note relative to vault root (e.g. 'projects/newproject')"),
-    content: z.string().describe("Markdown content of the note"),
-    tags: z.array(z.string()).optional().describe("Tags to add in frontmatter"),
-    frontmatter: z
-      .record(z.string(), z.unknown())
-      .optional()
-      .describe("Additional frontmatter key-value pairs"),
+    description: "Create a new note in the vault with optional frontmatter and content",
+    inputSchema: {
+      path: z.string().describe("Path for the new note relative to vault root (e.g. 'projects/newproject')"),
+      content: z.string().describe("Markdown content of the note"),
+      tags: z.array(z.string()).optional().describe("Tags to add in frontmatter"),
+      frontmatter: z
+        .record(z.string(), z.unknown())
+        .optional()
+        .describe("Additional frontmatter key-value pairs"),
+    },
   },
   async ({ path: notePath, content, tags, frontmatter }) => {
     const fullPath = resolveNotePath(notePath);
@@ -219,21 +225,23 @@ server.tool(
 );
 
 // Tool: Edit note
-server.tool(
+server.registerTool(
   "edit_note",
-  "Edit an existing note. Can replace the entire content or do a find-and-replace.",
   {
-    path: z.string().describe("Path to the note relative to vault root"),
-    content: z
-      .string()
-      .optional()
-      .describe("New full content to replace the entire note (excluding frontmatter unless includeFrontmatter is true)"),
-    find: z.string().optional().describe("Text to find in the note (for partial edit)"),
-    replace: z.string().optional().describe("Text to replace the found text with"),
-    includeFrontmatter: z
-      .boolean()
-      .optional()
-      .describe("If true, the content replaces the entire file including frontmatter. Default: false"),
+    description: "Edit an existing note. Can replace the entire content or do a find-and-replace.",
+    inputSchema: {
+      path: z.string().describe("Path to the note relative to vault root"),
+      content: z
+        .string()
+        .optional()
+        .describe("New full content to replace the entire note (excluding frontmatter unless includeFrontmatter is true)"),
+      find: z.string().optional().describe("Text to find in the note (for partial edit)"),
+      replace: z.string().optional().describe("Text to replace the found text with"),
+      includeFrontmatter: z
+        .boolean()
+        .optional()
+        .describe("If true, the content replaces the entire file including frontmatter. Default: false"),
+    },
   },
   async ({ path: notePath, content, find, replace, includeFrontmatter }) => {
     const fullPath = resolveNotePath(notePath);
@@ -278,10 +286,12 @@ server.tool(
 );
 
 // Tool: Delete note
-server.tool(
+server.registerTool(
   "delete_note",
-  "Delete a note from the vault",
-  { path: z.string().describe("Path to the note relative to vault root") },
+  {
+    description: "Delete a note from the vault",
+    inputSchema: { path: z.string().describe("Path to the note relative to vault root") },
+  },
   async ({ path: notePath }) => {
     const fullPath = resolveNotePath(notePath);
     await fs.unlink(fullPath);
@@ -292,10 +302,12 @@ server.tool(
 );
 
 // Tool: Search notes by tag
-server.tool(
+server.registerTool(
   "search_by_tag",
-  "Search for notes that contain a specific tag (inline #tag or in frontmatter)",
-  { tag: z.string().describe("Tag to search for (without the # prefix)") },
+  {
+    description: "Search for notes that contain a specific tag (inline #tag or in frontmatter)",
+    inputSchema: { tag: z.string().describe("Tag to search for (without the # prefix)") },
+  },
   async ({ tag }) => {
     const allFiles = await getAllMarkdownFiles(VAULT_PATH!);
     const matches: string[] = [];
@@ -321,10 +333,12 @@ server.tool(
 );
 
 // Tool: Search notes by content
-server.tool(
+server.registerTool(
   "search_notes",
-  "Search for notes containing specific text in their content",
-  { query: z.string().describe("Text to search for in note contents") },
+  {
+    description: "Search for notes containing specific text in their content",
+    inputSchema: { query: z.string().describe("Text to search for in note contents") },
+  },
   async ({ query }) => {
     const allFiles = await getAllMarkdownFiles(VAULT_PATH!);
     const matches: { path: string; snippet: string }[] = [];
@@ -358,10 +372,12 @@ server.tool(
 );
 
 // Tool: Get backlinks
-server.tool(
+server.registerTool(
   "get_backlinks",
-  "Find all notes that reference a given note via [[wikilinks]]",
-  { noteName: z.string().describe("Name of the note to find backlinks for (without .md extension)") },
+  {
+    description: "Find all notes that reference a given note via [[wikilinks]]",
+    inputSchema: { noteName: z.string().describe("Name of the note to find backlinks for (without .md extension)") },
+  },
   async ({ noteName }) => {
     const allFiles = await getAllMarkdownFiles(VAULT_PATH!);
     const backlinks: string[] = [];
@@ -390,13 +406,15 @@ server.tool(
 );
 
 // Tool: Add/update tags
-server.tool(
+server.registerTool(
   "manage_tags",
-  "Add or remove tags from a note's frontmatter",
   {
-    path: z.string().describe("Path to the note relative to vault root"),
-    add: z.array(z.string()).optional().describe("Tags to add"),
-    remove: z.array(z.string()).optional().describe("Tags to remove"),
+    description: "Add or remove tags from a note's frontmatter",
+    inputSchema: {
+      path: z.string().describe("Path to the note relative to vault root"),
+      add: z.array(z.string()).optional().describe("Tags to add"),
+      remove: z.array(z.string()).optional().describe("Tags to remove"),
+    },
   },
   async ({ path: notePath, add, remove }) => {
     const fullPath = resolveNotePath(notePath);
